@@ -1,0 +1,29 @@
+tools:
+  - name: LogInteraction
+    type: http
+    url: https://your.backend/api/interaction
+    method: POST
+    input_schema:
+      type: object
+      properties:
+        hcp_name: { type: string }
+        date: { type: string }
+        time: { type: string }
+        topics: { type: string }
+        materials_shared: { type: array, items: { type: string } }
+        sentiment: { type: string }
+  - name: EditInteraction
+    type: http
+    url: https://your.backend/api/interaction/{id}
+    method: PATCH
+  - name: FetchHCP
+    type: http
+    url: https://your.backend/api/interaction?hcp_name={hcp_name}
+    method: GET
+  - name: SuggestFollowUps
+    type: function
+    # implement as a localLangGraph node that calls Groq/generator
+  - name: SummarizeVoiceNote
+    type: http
+    url: https://your.backend/api/summarize
+    method: POST

@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* small tweaks to match screenshot */
+html,body,#root { height:100%; }
+body { font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+.chat-bubble-assistant { background:#e8f7fb; color:#0b2a3b; border-radius:8px; padding:10px; }
+.chat-bubble-success { background:#e6f7ea; color:#064a0f; border-radius:8px; padding:10px; }
+.readonly-input { background:#ffffff; border:1px solid #e5e7eb; padding:10px; border-radius:4px; }
+.left-scroll { scrollbar-width: thin; }
