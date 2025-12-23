@@ -43,16 +43,20 @@ export default function LogInteractionForm({ formData = {}, onChange = () => {} 
         <div>
           <label className="block text-sm font-medium text-gray-700">Interaction Type</label>
           <select
-            value={interaction_type}
-            onChange={(e) => set({ interaction_type: e.target.value })}
-            className="mt-1 w-full rounded-md bg-gray-100 p-3 border border-gray-200"
-          >
-            <option value="">Select interaction type</option>
-            <option>Meeting</option>
-            <option>Call</option>
-            <option>Email</option>
-            <option>Visit</option>
-          </select>
+  value={formData.interaction_type || ""}
+  onChange={(e) =>
+    onChange({ ...formData, interaction_type: e.target.value })
+  }
+  className="mt-1 w-full rounded-md bg-gray-100 p-3 border border-gray-200"
+>
+  <option value="">Select interaction type</option>
+  <option value="In-Person Meeting">In-Person Meeting</option>
+  <option value="Call">Call</option>
+  <option value="Email">Email</option>
+  <option value="Visit">Visit</option>
+</select>
+
+
         </div>
       </div>
 

@@ -11,18 +11,31 @@ print("🔥🔥 langgraph_client.py LOADED FRESH")
 def _smart_extract_all(text: str) -> Dict[str, Any]:
     print("🔥 USING _smart_extract_all:", text)
 
-    print("\n====================")
-    print("EXTRACTOR RECEIVED TEXT:")
-    print(text)
-    print("====================\n")
+    out: Dict[str, Any] = {}
+    text_lower = text.lower()
 
-    out = {}
+   # ---------- INTERACTION TYPE ----------
+    text_lower = text.lower()
 
-    # ---------- HCP NAME ----------
-    m = re.search(r"\bDr\.?\s+[A-Z][a-zA-Z]+\b", text, re.I)
+    if "email" in text_lower:
+        out["interaction_type"] = "Email"
+
+    elif "call" in text_lower:
+        out["interaction_type"] = "Call"
+
+    elif "visit" in text_lower:
+        out["interaction_type"] = "Visit"
+
+    elif "in-person" in text_lower or "meeting" in text_lower:
+        out["interaction_type"] = "In-Person Meeting"
+
+    # ---------- HCP NAME (Primary Doctor) ----------
+    m = re.search(r"\bDr\.?\s+[A-Z][a-zA-Z]+\b", text)
     if m:
-        name = m.group(0).replace("Dr.", "Dr").strip()
-        out["hcp_name"] = name
+        hcp_name = m.group(0).replace("Dr.", "Dr").strip()
+        out["hcp_name"] = hcp_name
+    else:
+        hcp_name = ""
 
     # ---------- DATE ----------
     m = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", text)
@@ -34,34 +47,58 @@ def _smart_extract_all(text: str) -> Dict[str, Any]:
     if m:
         out["time"] = m.group(1)
 
-    # ---------- MATERIALS ----------
-    mats = []
-    if "brochure" in text.lower():
-        mats.append("brochures")
-    if "sample" in text.lower():
-        mats.append("samples")
-    if mats:
-        out["materials_shared"] = mats
+    # ---------- MATERIALS & SAMPLES ----------
+    materials = []
+    samples = []
+
+    if "brochure" in text_lower:
+        materials.append("brochures")
+    if "slide" in text_lower:
+        materials.append("slides")
+    if "sample" in text_lower:
+        samples.append("samples")
+
+    if materials:
+        out["materials_shared"] = materials
+    if samples:
+        out["samples_distributed"] = samples
 
     # ---------- SENTIMENT ----------
-    if re.search(r"positive|good|excellent|great", text, re.I):
+    if re.search(r"\b(positive|good|excellent|great|interested)\b", text_lower):
         out["sentiment"] = "positive"
-    elif re.search(r"negative|bad|poor|unhappy", text, re.I):
+    elif re.search(r"\b(negative|bad|poor|unhappy)\b", text_lower):
         out["sentiment"] = "negative"
     else:
         out["sentiment"] = "neutral"
 
     # ---------- TOPICS ----------
-    m = re.search(r"discussed\s+(.*?)(?:\.|;|,|$)", text, re.I)
-    if m:
-        out["topics"] = m.group(1).strip()
+    topic_patterns = [
+        r"discussion was about\s+([a-zA-Z\s]+?)\s+drug",
+        r"discussed\s+([a-zA-Z\s]+)",
+        r"about\s+([a-zA-Z\s]+?)\s+drug"
+    ]
 
-    # ---------- ATTENDEES ----------
-    m = re.search(r"with\s+([A-Z][A-Za-z ]+)", text)
-    if m:
-        attendees_raw = m.group(1)
-        attendees = re.split(r"and|,", attendees_raw)
-        attendees = [a.strip() for a in attendees if a.strip()]
+    for pat in topic_patterns:
+        m = re.search(pat, text, re.I)
+        if m:
+            out["topics"] = m.group(1).strip() + " drug"
+            break
+
+    # ---------- ATTENDEES (Exclude Primary HCP) ----------
+    attendees = []
+
+    names = re.findall(
+        r"(Dr\.?\s+[A-Z][a-z]+|Nurse\s+[A-Z][a-z]+)",
+        text
+    )
+
+    for name in names:
+        clean = name.replace("Dr.", "Dr").strip()
+        if hcp_name and clean.lower() == hcp_name.lower():
+            continue
+        attendees.append(clean)
+
+    if attendees:
         out["attendees"] = attendees
 
     print("EXTRACTOR OUTPUT:")
@@ -70,10 +107,11 @@ def _smart_extract_all(text: str) -> Dict[str, Any]:
 
     return out
 
-
-async def orchestrate_text(user_text: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+async def orchestrate_text(
+    user_text: str,
+    session_id: Optional[str] = None
+) -> Dict[str, Any]:
     print("🔥 orchestrate_text CALLED with:", user_text)
     await _async_sleep()
     extracted = _smart_extract_all(user_text)
-
     return {"extraction": extracted}

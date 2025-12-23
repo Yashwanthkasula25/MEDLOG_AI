@@ -15,10 +15,12 @@ class ChatReq(BaseModel):
 
 class ExtractedFields(BaseModel):
     hcp_name: Optional[str] = None
+    interaction_type: Optional[str] = None
     date: Optional[str] = None
     time: Optional[str] = None
     topics: Optional[str] = None
     materials_shared: List[str] = Field(default_factory=list)
+    samples_distributed: List[str] = Field(default_factory=list)
     attendees: List[str] = Field(default_factory=list)
     sentiment: Optional[str] = None
 
@@ -39,7 +41,7 @@ async def chat_endpoint(req: ChatReq):
     if not req.text.strip():
         raise HTTPException(status_code=400, detail="Empty text")
 
-    # Call orchestrator
+    # 1️⃣ Call LangGraph orchestrator
     lg = await orchestrate_text(req.text)
     print("🔥 Orchestrator output:", lg)
 
@@ -50,6 +52,7 @@ async def chat_endpoint(req: ChatReq):
             ]
         }
 
+    # 2️⃣ Validate extracted fields
     extracted: Dict[str, Any] = lg["extraction"]
     print("🔥 Extracted fields:", extracted)
 
@@ -57,21 +60,26 @@ async def chat_endpoint(req: ChatReq):
         fields = ExtractedFields(**extracted)
     except Exception as e:
         return {
-            "actions": [{"type": "message", "text": f"Validation error: {str(e)}"}]
+            "actions": [
+                {"type": "message", "text": f"Validation error: {str(e)}"}
+            ]
         }
 
+    # 3️⃣ Remove empty values
     final_fields = {
-    k: v for k, v in fields.dict().items()
-    if v is not None
-}
-
+        k: v for k, v in fields.dict().items()
+        if v not in (None, [], "")
+    }
 
     print("🔥 Final fields sent to UI:", final_fields)
 
+    # 4️⃣ Build actions for frontend
     actions = []
     if final_fields:
         actions.append({"type": "update", "fields": final_fields})
 
-    actions.append({"type": "message", "text": "Interaction parsed successfully."})
+    actions.append(
+        {"type": "message", "text": "Interaction parsed successfully."}
+    )
 
     return {"actions": actions}
