@@ -2,7 +2,10 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
-
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from .deps import get_db
+from .crud import create_interaction
 from .langgraph_client import orchestrate_text
 
 router = APIRouter()
@@ -35,7 +38,7 @@ class ExtractedFields(BaseModel):
 
 
 @router.post("/chat")
-async def chat_endpoint(req: ChatReq):
+async def chat_endpoint(req: ChatReq, db: Session = Depends(get_db)):
     print("🔥 /api/chat received:", req.text)
 
     if not req.text.strip():
@@ -72,7 +75,9 @@ async def chat_endpoint(req: ChatReq):
     }
 
     print("🔥 Final fields sent to UI:", final_fields)
-
+    if final_fields:
+        create_interaction(db, final_fields)
+    print("✅ Interaction saved to DB")
     # 4️⃣ Build actions for frontend
     actions = []
     if final_fields:
@@ -81,5 +86,6 @@ async def chat_endpoint(req: ChatReq):
     actions.append(
         {"type": "message", "text": "Interaction parsed successfully."}
     )
+    
 
     return {"actions": actions}

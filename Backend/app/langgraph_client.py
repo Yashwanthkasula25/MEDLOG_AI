@@ -7,10 +7,10 @@ async def _async_sleep():
     await asyncio.sleep(0)
 print("🔥🔥 langgraph_client.py LOADED FRESH")
 
-
+print("app launched")
 def _smart_extract_all(text: str) -> Dict[str, Any]:
     print("🔥 USING _smart_extract_all:", text)
-
+    print()
     out: Dict[str, Any] = {}
     text_lower = text.lower()
 
@@ -115,3 +115,4 @@ async def orchestrate_text(
     await _async_sleep()
     extracted = _smart_extract_all(user_text)
     return {"extraction": extracted}
+
