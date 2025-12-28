@@ -4,9 +4,10 @@ from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from fastapi import Depends
-from .deps import get_db
+
 from .crud import create_interaction
 from .langgraph_client import orchestrate_text
+from .deps import get_db
 
 router = APIRouter()
 
