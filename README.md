@@ -4,15 +4,15 @@ This project is a full-stack replica of the interaction logging interface provid
 
 It includes:
 
-✔ Fully functional React frontend
+✔ Fully functional React frontend.
 
-✔ Styled UI matching the exact reference screenshots
+✔ Styled UI matching the exact reference screenshots.
 
-✔ FastAPI backend with /api/chat endpoint
+✔ FastAPI backend with /api/chat endpoint.
 
-✔ Integration with LangGraph orchestrator
+✔ Integration with LangGraph orchestrator.
 
-✔ Automatic field extraction + UI autofill
+✔ Automatic field extraction + UI autofill.
 
 🏗  Tech Stack
 Frontend 
