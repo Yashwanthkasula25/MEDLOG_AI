@@ -40,15 +40,15 @@ Extraction + Validation Pipeline
 🎯 Features Implemented (as per requirements)
 ✅ UI Requirements
 
-Exact replica of the reference design
+Exact replica of the reference design.
 
-Light blue instruction card
+Light blue instruction card.
 
 User chat message (blue bubble)
 
-AI response bubble (light grey)
+AI response bubble (light grey).
 
-Green success card with correct text
+Green success card with correct text.
 
 Right-side rounded “Log” floating button
 
