@@ -15,7 +15,7 @@ It includes:
 ✔ Automatic field extraction + UI autofill.
 
 🏗  Tech Stack
-Frontend 
+Frontend       
 
 React (Vite)
 
